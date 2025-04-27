@@ -1,18 +1,18 @@
-# Tekton CI/CD for Ruby on Rails App 🚀
+# Tekton CI/CD for Ruby on Rails App 
 
 This repo sets up a simple Tekton pipeline to:
 - Clone a Rails app from GitHub
 - Build a Docker image
 - Push it to Docker Hub
 
-## 🛠 Prerequisites
+##  Prerequisites
 
 - Kubernetes (Minikube, K3s, etc.)
 - Tekton Pipelines + Dashboard
 - Docker Hub account
 - Rails app on GitHub (public)
 
-## ⚙️ Setup Instructions
+##  Setup Instructions
 
 1. **Install Tekton Pipelines & Dashboard**
 
