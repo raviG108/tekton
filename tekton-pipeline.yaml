@@ -1,0 +1,66 @@
+# ServiceAccount using Docker Hub secret
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pipeline-account
+secrets:
+  - name: dockerhub-secret
+---
+# Task: clone repo, build docker image, push to Docker Hub
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build-and-push
+spec:
+  params:
+    - name: IMAGE
+    - name: GIT_URL
+  steps:
+    - name: git
+      image: alpine/git
+      script: |
+        git clone $(params.GIT_URL) app
+    - name: build
+      image: docker
+      workingDir: /workspace
+      script: |
+        cd app
+        docker build -t $(params.IMAGE) .
+    - name: push
+      image: docker
+      script: |
+        docker push $(params.IMAGE)
+---
+# Pipeline using the task
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: rails-ci
+spec:
+  params:
+    - name: IMAGE
+    - name: GIT_URL
+  tasks:
+    - name: build-and-push
+      taskRef:
+        name: build-and-push
+      params:
+        - name: IMAGE
+          value: $(params.IMAGE)
+        - name: GIT_URL
+          value: $(params.GIT_URL)
+---
+# PipelineRun to trigger the pipeline
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: rails-ci-run
+spec:
+  pipelineRef:
+    name: rails-ci
+  serviceAccountName: pipeline-account
+  params:
+    - name: IMAGE
+      value: docker.io/your-dockerhub-username/rails-app:latest
+    - name: GIT_URL
+      value: https://github.com/yourusername/your-rails-repo.git
